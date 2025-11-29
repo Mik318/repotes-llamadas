@@ -1,0 +1,10 @@
+export * from './dashboard.service';
+import { DashboardService } from './dashboard.service';
+export * from './dashboard.serviceInterface';
+export * from './default.service';
+import { DefaultService } from './default.service';
+export * from './default.serviceInterface';
+export * from './documentacion.service';
+import { DocumentacionService } from './documentacion.service';
+export * from './documentacion.serviceInterface';
+export const APIS = [DashboardService, DefaultService, DocumentacionService];

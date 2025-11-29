@@ -1,0 +1,391 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Dashboard de Llamadas IA</h1>
+        <p class="subtitle">Monitorea y analiza las conversaciones con clientes</p>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-refresh" (click)="loadCalls()">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"
+            />
+          </svg>
+          Actualizar
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+          />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Total de Llamadas</p>
+        <p class="stat-value">{{ stats().total }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card success">
+      <div class="stat-icon">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Llamadas Activas</p>
+        <p class="stat-value">{{ stats().active }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card secondary">
+      <div class="stat-icon">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Con Interacciones</p>
+        <p class="stat-value">{{ stats().withInteractions }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card warning">
+      <div class="stat-icon">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <line x1="12" y1="1" x2="12" y2="13" />
+          <path d="M16 6l-4-4-4 4" />
+          <path d="M3 16h18v6H3z" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Promedio Interacciones</p>
+        <p class="stat-value">{{ stats().avgInteractions }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="search-bar">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+      </svg>
+      <input
+        type="text"
+        placeholder="Buscar por teléfono, ID o SID..."
+        [value]="searchQuery()"
+        (input)="updateSearch($any($event.target).value)"
+      />
+    </div>
+
+    <div class="filter-buttons">
+      <button
+        class="filter-btn"
+        [class.active]="filterStatus() === 'all'"
+        (click)="updateFilter('all')"
+      >
+        Todas
+      </button>
+      <button
+        class="filter-btn"
+        [class.active]="filterStatus() === 'active'"
+        (click)="updateFilter('active')"
+      >
+        Activas
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="content-grid">
+    <!-- Calls List -->
+    <div class="calls-list">
+      <div class="section-header">
+        <h2>Llamadas Recientes</h2>
+        <span class="count-badge">{{ filteredCalls().length }}</span>
+      </div>
+
+      <div class="calls-container">
+        @for (call of filteredCalls(); track call.id) {
+        <div
+          class="call-card"
+          [class.selected]="selectedCall()?.id === call.id"
+          (click)="selectCall(call)"
+        >
+          <div class="call-card-header">
+            <div class="call-id">
+              <span class="id-label">#{{ call.id }}</span>
+              <span class="status-badge" [class]="call.status">
+                {{ call.status }}
+              </span>
+            </div>
+            <div class="call-time">
+              {{ formatDate(call.start_time) }}
+            </div>
+          </div>
+
+          <div class="call-card-body">
+            <div class="call-info">
+              <div class="info-row">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                  />
+                </svg>
+                <span>{{ formatPhone(call.user_phone) }}</span>
+              </div>
+
+              <div class="info-row">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <span>{{ call.interaction_log.length }} interacciones</span>
+              </div>
+            </div>
+
+            @if (call.interaction_log.length > 0) {
+            <div class="call-preview">
+              <p class="preview-label">Última interacción:</p>
+              <p class="preview-text">
+                {{ call.interaction_log[call.interaction_log.length - 1].user }}
+              </p>
+            </div>
+            }
+          </div>
+
+          <div class="call-card-footer">
+            <span class="call-sid">{{ call.call_sid }}</span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </div>
+        } @empty {
+        <div class="empty-state">
+          <svg
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+            />
+          </svg>
+          <p>No se encontraron llamadas</p>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Call Details -->
+    <div class="call-details" [class.visible]="selectedCall()">
+      @if (selectedCall(); as call) {
+      <div class="details-header">
+        <div>
+          <h2>Detalles de la Llamada #{{ call.id }}</h2>
+          <p class="details-subtitle">{{ formatDate(call.start_time) }}</p>
+        </div>
+        <button class="btn-close" (click)="closeDetails()">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="details-content">
+        <!-- Call Info -->
+        <div class="details-section">
+          <h3>Información General</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Teléfono</span>
+              <span class="info-value">{{ formatPhone(call.user_phone) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Estado</span>
+              <span class="status-badge" [class]="call.status">{{ call.status }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Call SID</span>
+              <span class="info-value mono">{{ call.call_sid }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Duración</span>
+              <span class="info-value">{{ call.duration || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversation Timeline -->
+        <div class="details-section">
+          <h3>
+            Conversación
+            <span class="interaction-count">{{ call.interaction_log.length }} mensajes</span>
+          </h3>
+
+          @if (call.interaction_log.length > 0) {
+          <div class="conversation-timeline">
+            @for (interaction of call.interaction_log; track $index) {
+            <div class="interaction-group">
+              <!-- User Message -->
+              <div class="message user-message">
+                <div class="message-header">
+                  <span class="message-sender">Usuario</span>
+                  <span class="message-time">{{ formatTimestamp(interaction.timestamp) }}</span>
+                </div>
+                <div class="message-bubble">
+                  <p>{{ interaction.user }}</p>
+                </div>
+              </div>
+
+              <!-- AI Response -->
+              <div class="message ai-message">
+                <div class="message-header">
+                  <span class="message-sender">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                      <line x1="9" y1="9" x2="9.01" y2="9" />
+                      <line x1="15" y1="9" x2="15.01" y2="9" />
+                    </svg>
+                    IA Asistente
+                  </span>
+                  <span class="message-time">{{ formatTimestamp(interaction.timestamp) }}</span>
+                </div>
+                <div class="message-bubble">
+                  <p>{{ interaction.ai }}</p>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+          } @else {
+          <div class="empty-conversation">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <p>No hay interacciones registradas</p>
+          </div>
+          }
+        </div>
+      </div>
+      } @else {
+      <div class="no-selection">
+        <svg
+          width="80"
+          height="80"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1"
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          <line x1="9" y1="9" x2="15" y2="9" />
+          <line x1="9" y1="13" x2="15" y2="13" />
+        </svg>
+        <p>Selecciona una llamada para ver los detalles</p>
+      </div>
+      }
+    </div>
+  </div>
+</div>
