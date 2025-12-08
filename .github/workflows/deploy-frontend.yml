@@ -3,9 +3,9 @@ name: Deploy Frontend to Dokploy
 on:
   push:
     branches:
-      - main # Cambia a tu rama principal si es diferente
+      - main
     paths:
-      - 'frontend/**' # Ajusta la ruta si tu frontend está en otro directorio
+      - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
 
 jobs:
@@ -19,14 +19,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22' # O la versión que uses
-          node-version: '22' # O la versión que uses
-          node-version: '22' # O la versión que uses
+          node-version: '22'
           cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json' # Ajusta la ruta
+          cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Install dependencies
-        working-directory: ./frontend # Ajusta según tu estructura
+        working-directory: ./frontend
         run: npm ci
 
       - name: Build Angular app
