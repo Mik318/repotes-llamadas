@@ -10,7 +10,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideApi({
       // basePath: 'https://reportes-api.onrender.com',
-      basePath: 'http://127.0.0.1:8000',
+      basePath: 'https://api-voice.sistems-mik3.com',
       credentials: {
         bearerAuth: () => {
           return localStorage.getItem('jwt') ?? undefined;
