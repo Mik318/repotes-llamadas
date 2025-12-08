@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/deploy-frontend.yml'
 
 jobs:
   deploy:
@@ -22,11 +19,9 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: ./frontend
         run: npm ci
 
       - name: Build Angular app
-        working-directory: ./frontend
         run: npm run build -- --configuration production
 
       - name: Trigger Dokploy Deployment
@@ -34,4 +29,4 @@ jobs:
           curl -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}"
 
       - name: Deployment status
-        run: echo "✅ Deployment triggered successfully!"
+        run: echo "✅ Deployment triggered successfully!
