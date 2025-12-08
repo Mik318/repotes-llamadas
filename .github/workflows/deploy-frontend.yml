@@ -1,0 +1,41 @@
+name: Deploy Frontend to Dokploy
+
+on:
+  push:
+    branches:
+      - main # Cambia a tu rama principal si es diferente
+    paths:
+      - 'frontend/**' # Ajusta la ruta si tu frontend está en otro directorio
+      - '.github/workflows/deploy-frontend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # O la versión que uses
+          node-version: '22' # O la versión que uses
+          node-version: '22' # O la versión que uses
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json' # Ajusta la ruta
+
+      - name: Install dependencies
+        working-directory: ./frontend # Ajusta según tu estructura
+        run: npm ci
+
+      - name: Build Angular app
+        working-directory: ./frontend
+        run: npm run build --prod
+
+      - name: Trigger Dokploy Deployment
+        run: |
+          curl -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}"
+
+      - name: Deployment status
+        run: echo "✅ Deployment triggered successfully!"
