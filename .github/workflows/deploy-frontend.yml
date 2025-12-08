@@ -26,7 +26,9 @@ jobs:
 
       - name: Trigger Dokploy Deployment
         run: |
-          curl -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}"
+          curl -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{"branch": "main"}'
 
       - name: Deployment status
-        run: echo "✅ Deployment triggered successfully!
+        run: echo "Deployment triggered successfully!"
