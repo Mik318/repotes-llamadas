@@ -7,13 +7,15 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ValidationErrorLocInner } from './validationErrorLocInner';
 
 
-export interface ValidationError { 
-    loc: Array<ValidationErrorLocInner>;
-    msg: string;
-    type: string;
+/**
+ * Interaction log entry.
+ */
+export interface InteractionLog { 
+    user: string;
+    ai: string;
+    timestamp: number;
 }
 
 

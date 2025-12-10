@@ -1,5 +1,5 @@
 /**
- * FastAPI
+ * ORISOD Enzyme® Voice Assistant API
  *
  * 
  *
@@ -38,7 +38,7 @@ export class DocumentacionService extends BaseService implements DocumentacionSe
 
     /**
      * Get Openapi Yaml
-     * Descargar OpenAPI en YAML
+     * Descargar OpenAPI en formato YAML
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */

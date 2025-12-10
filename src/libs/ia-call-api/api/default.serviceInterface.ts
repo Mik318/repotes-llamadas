@@ -1,5 +1,5 @@
 /**
- * FastAPI
+ * ORISOD Enzyme® Voice Assistant API
  *
  * 
  *
@@ -11,6 +11,7 @@ import { HttpHeaders }                                       from '@angular/comm
 
 import { Observable }                                        from 'rxjs';
 
+import { CallRequest } from '../model/models';
 import { HTTPValidationError } from '../model/models';
 
 
@@ -23,34 +24,34 @@ export interface DefaultServiceInterface {
     configuration: Configuration;
 
     /**
-     * Inicio
-     * Endpoint para cuando comienza la llamada
+     * Handle Outgoing Call Get
+     * Handle outgoing call webhook (GET) and return TwiML response.
      */
-    inicioInicioPost(extraHttpRequestParams?: any): Observable<any>;
+    handleOutgoingCallGet(extraHttpRequestParams?: any): Observable<any>;
 
     /**
-     * Recording
-     * Endpoint que recibe el callback de la grabación de Twilio. Twilio enviará RecordingUrl y otros metadatos. Aquí simplemente confirmamos la recepción y agradecemos al usuario. En un siguiente paso podríamos descargar la grabación y transcribirla con un servicio ASR externo.
+     * Handle Outgoing Call Post
+     * Handle outgoing call webhook (POST) and return TwiML response.
      */
-    recordingRecordingPost(extraHttpRequestParams?: any): Observable<any>;
+    handleOutgoingCallPost(extraHttpRequestParams?: any): Observable<any>;
 
     /**
-     * Root
-     * 
+     * Handle Recording Status
+     * Handle recording status updates from Twilio.
      */
-    rootGet(extraHttpRequestParams?: any): Observable<any>;
+    handleRecordingStatus(extraHttpRequestParams?: any): Observable<any>;
 
     /**
-     * Serve Audio
-     * Endpoint para servir archivos de audio
-     * @param filename 
+     * Health Check
+     * Health check endpoint.
      */
-    serveAudioAudioFilenameGet(filename: string, extraHttpRequestParams?: any): Observable<any>;
+    healthCheckGet(extraHttpRequestParams?: any): Observable<any>;
 
     /**
-     * Voice
-     * 
+     * Make Call
+     * Initiate an outbound call to the specified phone number.
+     * @param callRequest 
      */
-    voiceVoicePost(extraHttpRequestParams?: any): Observable<any>;
+    makeCallMakeCallPost(callRequest: CallRequest, extraHttpRequestParams?: any): Observable<any>;
 
 }

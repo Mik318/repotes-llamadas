@@ -1,5 +1,5 @@
 /**
- * FastAPI
+ * ORISOD Enzyme® Voice Assistant API
  *
  * 
  *
@@ -11,6 +11,7 @@ import { HttpHeaders }                                       from '@angular/comm
 
 import { Observable }                                        from 'rxjs';
 
+import { CallUpdate } from '../model/models';
 import { HTTPValidationError } from '../model/models';
 
 
@@ -21,6 +22,20 @@ import { Configuration }                                     from '../configurat
 export interface DashboardServiceInterface {
     defaultHeaders: HttpHeaders;
     configuration: Configuration;
+
+    /**
+     * Delete Call
+     * Eliminar una llamada de la base de datos
+     * @param callId 
+     */
+    deleteCallApiCallsCallIdDelete(callId: number, extraHttpRequestParams?: any): Observable<any>;
+
+    /**
+     * Get Call By Sid
+     * Obtener una llamada específica por Twilio Call SID
+     * @param callSid 
+     */
+    getCallBySidApiCallsSidCallSidGet(callSid: string, extraHttpRequestParams?: any): Observable<any>;
 
     /**
      * Get Call Details
@@ -39,7 +54,7 @@ export interface DashboardServiceInterface {
 
     /**
      * Get Openapi Yaml
-     * Descargar OpenAPI en YAML
+     * Descargar OpenAPI en formato YAML
      */
     getOpenapiYamlApiOpenapiYamlGet(extraHttpRequestParams?: any): Observable<any>;
 
@@ -49,5 +64,13 @@ export interface DashboardServiceInterface {
      * @param phone 
      */
     searchCallsApiSearchGet(phone: string, extraHttpRequestParams?: any): Observable<any>;
+
+    /**
+     * Update Call
+     * Actualizar información de una llamada
+     * @param callId 
+     * @param callUpdate 
+     */
+    updateCallApiCallsCallIdPut(callId: number, callUpdate: CallUpdate, extraHttpRequestParams?: any): Observable<any>;
 
 }

@@ -1,8 +1,74 @@
 openapi: 3.1.0
 info:
-  title: FastAPI
-  version: 0.1.0
+  title: ORISOD Enzyme® Voice Assistant API
+  version: 1.0.0
 paths:
+  /:
+    get:
+      summary: Health Check
+      description: Health check endpoint.
+      operationId: health_check__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /make-call:
+    post:
+      summary: Make Call
+      description: Initiate an outbound call to the specified phone number.
+      operationId: make_call_make_call_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /outgoing-call:
+    get:
+      summary: Handle Outgoing Call Get
+      description: Handle outgoing call webhook (GET) and return TwiML response.
+      operationId: handle_outgoing_call_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+    post:
+      summary: Handle Outgoing Call Post
+      description: Handle outgoing call webhook (POST) and return TwiML response.
+      operationId: handle_outgoing_call_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /recording-status:
+    post:
+      summary: Handle Recording Status
+      description: Handle recording status updates from Twilio.
+      operationId: handle_recording_status
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
   /api/calls:
     get:
       tags:
@@ -63,6 +129,88 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - dashboard
+      summary: Update Call
+      description: Actualizar información de una llamada
+      operationId: update_call_api_calls__call_id__put
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Call Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - dashboard
+      summary: Delete Call
+      description: Eliminar una llamada de la base de datos
+      operationId: delete_call_api_calls__call_id__delete
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Call Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/calls/sid/{call_sid}:
+    get:
+      tags:
+      - dashboard
+      summary: Get Call By Sid
+      description: Obtener una llamada específica por Twilio Call SID
+      operationId: get_call_by_sid_api_calls_sid__call_sid__get
+      parameters:
+      - name: call_sid
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Call Sid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/search:
     get:
       tags:
@@ -95,7 +243,7 @@ paths:
       - dashboard
       - Documentacion
       summary: Get Openapi Yaml
-      description: Descargar OpenAPI en YAML
+      description: Descargar OpenAPI en formato YAML
       operationId: get_openapi_yaml_api_openapi_yaml_get
       responses:
         '200':
@@ -103,81 +251,44 @@ paths:
           content:
             application/json:
               schema: {}
-  /inicio:
-    post:
-      summary: Inicio
-      description: Endpoint para cuando comienza la llamada
-      operationId: inicio_inicio_post
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /voice:
-    post:
-      summary: Voice
-      operationId: voice_voice_post
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /recording:
-    post:
-      summary: Recording
-      description: 'Endpoint que recibe el callback de la grabación de Twilio.
-
-        Twilio enviará RecordingUrl y otros metadatos.
-
-        Aquí simplemente confirmamos la recepción y agradecemos al usuario.
-
-        En un siguiente paso podríamos descargar la grabación y transcribirla con
-        un servicio ASR externo.'
-      operationId: recording_recording_post
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /:
-    get:
-      summary: Root
-      operationId: root__get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /audio/{filename}:
-    get:
-      summary: Serve Audio
-      description: Endpoint para servir archivos de audio
-      operationId: serve_audio_audio__filename__get
-      parameters:
-      - name: filename
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Filename
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
+    CallRequest:
+      properties:
+        to_phone_number:
+          type: string
+          title: To Phone Number
+      type: object
+      required:
+      - to_phone_number
+      title: CallRequest
+    CallUpdate:
+      properties:
+        interaction_log:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/InteractionLog'
+            type: array
+          - type: 'null'
+          title: Interaction Log
+        status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+        duration:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Duration
+        user_intent:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: User Intent
+      type: object
+      title: CallUpdate
+      description: Schema for updating a call.
     HTTPValidationError:
       properties:
         detail:
@@ -187,6 +298,24 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    InteractionLog:
+      properties:
+        user:
+          type: string
+          title: User
+        ai:
+          type: string
+          title: Ai
+        timestamp:
+          type: integer
+          title: Timestamp
+      type: object
+      required:
+      - user
+      - ai
+      - timestamp
+      title: InteractionLog
+      description: Interaction log entry.
     ValidationError:
       properties:
         loc:

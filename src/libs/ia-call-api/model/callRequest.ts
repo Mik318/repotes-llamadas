@@ -7,13 +7,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ValidationErrorLocInner } from './validationErrorLocInner';
 
 
-export interface ValidationError { 
-    loc: Array<ValidationErrorLocInner>;
-    msg: string;
-    type: string;
+export interface CallRequest { 
+    to_phone_number: string;
 }
 
 

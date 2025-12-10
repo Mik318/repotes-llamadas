@@ -1,5 +1,5 @@
 /**
- * FastAPI
+ * ORISOD Enzyme® Voice Assistant API
  *
  * 
  *
@@ -23,7 +23,7 @@ export interface DocumentacionServiceInterface {
 
     /**
      * Get Openapi Yaml
-     * Descargar OpenAPI en YAML
+     * Descargar OpenAPI en formato YAML
      */
     getOpenapiYamlApiOpenapiYamlGet(extraHttpRequestParams?: any): Observable<any>;
 

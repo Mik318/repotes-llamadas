@@ -8,6 +8,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardService } from '../../../libs/ia-call-api';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration } from 'chart.js';
 
 interface InteractionLog {
   user: string;
@@ -21,15 +23,20 @@ interface CallData {
   duration: number | null;
   interaction_log: InteractionLog[];
   user_phone: string;
-  start_time: string;
+  start_time: string | null;
   call_sid: string;
   user_intent: string | null;
+}
+
+interface CallsResponse {
+  calls: CallData[];
+  total: number;
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BaseChartDirective],
   templateUrl: './home.html',
   styleUrl: './home.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -83,14 +90,186 @@ export class Home implements OnInit {
     return result;
   });
 
+  // Configuración de gráfica de dona - Estado de llamadas
+  public statusChartData = computed(() => {
+    const allCalls = this.calls();
+    const activeCount = allCalls.filter(c => c.status === 'active').length;
+    const otherCount = allCalls.length - activeCount;
+
+    return {
+      labels: ['Activas', 'Otras'],
+      datasets: [{
+        data: [activeCount, otherCount],
+        backgroundColor: ['#4ade80', '#94a3b8'],
+        borderWidth: 0,
+      }]
+    } as ChartConfiguration<'doughnut'>['data'];
+  });
+
+  public statusChartOptions: ChartConfiguration<'doughnut'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: '#e2e8f0',
+          font: { size: 12 },
+          padding: 10,
+          boxWidth: 15
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+        titleColor: '#e2e8f0',
+        bodyColor: '#e2e8f0',
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: true
+      }
+    }
+  };
+
+  // Configuración de gráfica de barras - Interacciones por llamada
+  public interactionsChartData = computed(() => {
+    const allCalls = this.calls().slice(0, 10); // Top 10 más recientes
+
+    return {
+      labels: allCalls.map(c => `#${c.id}`),
+      datasets: [{
+        label: 'Interacciones',
+        data: allCalls.map(c => c.interaction_log.length),
+        backgroundColor: '#3b82f6',
+        borderRadius: 4,
+      }]
+    } as ChartConfiguration<'bar'>['data'];
+  });
+
+  public interactionsChartOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: '#e2e8f0',
+          stepSize: 1,
+          font: { size: 11 }
+        },
+        grid: {
+          color: 'rgba(148, 163, 184, 0.1)'
+        }
+      },
+      x: {
+        ticks: {
+          color: '#e2e8f0',
+          font: { size: 11 },
+          maxRotation: 0,
+          minRotation: 0
+        },
+        grid: {
+          display: false
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+        titleColor: '#e2e8f0',
+        bodyColor: '#e2e8f0',
+        padding: 12,
+        cornerRadius: 8
+      }
+    }
+  };
+
+  // Configuración de gráfica de línea - Tendencia de llamadas
+  public callsTrendChartData = computed(() => {
+    const allCalls = this.calls();
+    // Agrupar por rangos (últimos 10 IDs)
+    const ranges: string[] = [];
+    const counts: number[] = [];
+    const step = Math.max(1, Math.floor(allCalls.length / 10));
+
+    for (let i = 0; i < allCalls.length; i += step) {
+      const chunk = allCalls.slice(i, i + step);
+      if (chunk.length > 0) {
+        ranges.push(`${chunk[0].id}-${chunk[chunk.length - 1].id}`);
+        counts.push(chunk.length);
+      }
+    }
+
+    return {
+      labels: ranges.slice(0, 10),
+      datasets: [{
+        label: 'Llamadas',
+        data: counts.slice(0, 10),
+        borderColor: '#8b5cf6',
+        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#8b5cf6',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    } as ChartConfiguration<'line'>['data'];
+  });
+
+  public callsTrendChartOptions: ChartConfiguration<'line'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: '#e2e8f0',
+          stepSize: 1,
+          font: { size: 11 }
+        },
+        grid: {
+          color: 'rgba(148, 163, 184, 0.1)'
+        }
+      },
+      x: {
+        ticks: {
+          color: '#e2e8f0',
+          maxRotation: 45,
+          minRotation: 30,
+          font: { size: 10 },
+          autoSkip: true,
+          maxTicksLimit: 8
+        },
+        grid: {
+          display: false
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+        titleColor: '#e2e8f0',
+        bodyColor: '#e2e8f0',
+        padding: 12,
+        cornerRadius: 8
+      }
+    }
+  };
+
   ngOnInit(): void {
     this.loadCalls();
   }
 
   loadCalls(): void {
-    this.dashBoardService.getCallsApiCallsGet().subscribe((res) => {
-      console.log('Calls loaded:', res);
-      this.calls.set(res as CallData[]);
+    this.dashBoardService.getCallsApiCallsGet().subscribe((res: CallsResponse) => {
+      this.calls.set(res.calls);
     });
   }
 
@@ -110,7 +289,10 @@ export class Home implements OnInit {
     this.searchQuery.set(query);
   }
 
-  formatDate(dateString: string): string {
+  formatDate(dateString: string | null): string {
+    if (!dateString) {
+      return 'N/A';
+    }
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('es-MX', {
       year: 'numeric',
